@@ -2,7 +2,6 @@ from sqlalchemy.orm import Session
 from app.database import models
 from app.models.user import UserSignup
 from sqlalchemy import insert
-from app.utils.user import get_hashed_password
 from jose import JWTError, jwt
 from typing import Optional
 from datetime import datetime, timedelta
