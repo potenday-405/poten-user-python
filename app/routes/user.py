@@ -56,5 +56,14 @@ async def create_token(email:str, password:str, db:Session = Depends(get_test_db
         access_token=access_token,
         token_type="bearer"
     )
+
+@router.get("/test")
+async def test(email:str, password:str, db:Session = Depends(get_test_db), version: str = Header("1.0")):
+    """로그인 시 accessToken 발행"""
+
+    return {
+        "email" : email,
+        "password" : password,
+    }
     
     
