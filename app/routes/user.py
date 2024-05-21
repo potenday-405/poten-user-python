@@ -1,22 +1,12 @@
+from typing import Annotated
 from fastapi import APIRouter, Request,Header, HTTPException, Depends, status
 from sqlalchemy.orm import Session
-from app.database.settings import SessionLocal, engine
+from app.database.settings import SessionLocal, engine, get_test_db
 from app.services.user import UserService
 from app.core.db import Engineconn
 from app.models.user import UserSignup, UserSignupResponse, UserToken, UserLogin
 
 router = APIRouter()
-
-engine = Engineconn()
-session = engine.create_session()
-
-def get_test_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
 
 @router.post("/signup")
 async def signup(user:UserSignup, db:Session = Depends(get_test_db), version: str = Header("1.0")) -> UserSignupResponse:
@@ -56,13 +46,33 @@ async def create_token(request:UserLogin, db:Session = Depends(get_test_db), ver
         access_token=access_token,
         token_type="bearer"
     )
+    
+
+@router.get("/me")
+async def get_me(version: str = Header("1.0"), access_token: Annotated[str | None, Header()] = None, db:Session = Depends(get_test_db)):
+    return ""
+
 
 @router.get("/test")
 async def test():
-    """로그인 시 accessToken 발행"""
+    """get 테스트용"""
 
-    return {
-        "message" : "test success!"
-    }
-    
-    
+    return { "message" : "get test success!" }
+
+@router.post("/test")
+async def test():
+    """post 테스트용"""
+
+    return { "message" : "post test success!" }
+
+@router.put("/test")
+async def test():
+    """put 테스트용"""
+
+    return { "message" : "put test success!" }
+
+@router.delete("/test")
+async def test():
+    """put 테스트용"""
+
+    return { "message" : "delete test success!" }
