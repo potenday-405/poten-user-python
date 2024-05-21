@@ -33,7 +33,7 @@ class UserService():
         
         return user
 
-    async def check_validate_user(self, email:str, password):
+    async def check_validate_user(self, email, password):
         """이메일로 사용자 조회"""
         User = models.User
         user = self.db.query(User).filter(

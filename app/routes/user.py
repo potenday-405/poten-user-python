@@ -41,7 +41,7 @@ async def create_token(request:UserLogin, db:Session = Depends(get_test_db), ver
     user_service = UserService(db)
 
     # 유효한 회원인지 체크
-    is_validate = await user_service.check_validate_user(email=email, password=password)
+    is_validate = await user_service.check_validate_user(email=request.email, password=request.user_password)
     if not is_validate:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -50,7 +50,7 @@ async def create_token(request:UserLogin, db:Session = Depends(get_test_db), ver
         )
 
     # accesstoken 발행
-    access_token = user_service.create_access_token(data={"sub": email})
+    access_token = user_service.create_access_token(data={"sub": request.email})
 
     return UserToken(
         access_token=access_token,
