@@ -3,12 +3,12 @@ from sqlalchemy.orm import Session
 from app.database.settings import SessionLocal, engine
 from app.services.user import UserService
 from app.core.db import Engineconn
-from app.models.user import UserSignup, UserSignupResponse, UserToken
+from app.models.user import UserSignup, UserSignupResponse, UserToken, UserLogin
+
+router = APIRouter()
 
 engine = Engineconn()
 session = engine.create_session()
-
-router = APIRouter()
 
 def get_test_db():
     db = SessionLocal()
@@ -35,7 +35,7 @@ async def signup(user:UserSignup, db:Session = Depends(get_test_db), version: st
     return UserSignupResponse(message="회원가입이 완료되었습니다.")
 
 @router.post("/login")
-async def create_token(email:str, password:str, db:Session = Depends(get_test_db), version: str = Header("1.0")) -> UserToken:
+async def create_token(request:UserLogin, db:Session = Depends(get_test_db), version: str = Header("1.0")) -> UserToken:
     """로그인 시 accessToken 발행"""
 
     user_service = UserService(db)

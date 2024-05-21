@@ -7,6 +7,10 @@ class UserSignup(BaseModel):
     user_password : str
     phone : str
 
+class UserLogin(BaseModel):
+    email :str
+    user_password : str
+
 class UserSignupResponse(BaseModel):
     message : str 
     
