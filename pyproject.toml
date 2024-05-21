@@ -18,7 +18,6 @@ python-multipart = "^0.0.9"
 pydantic-settings = "^2.2.1"
 starlette = "^0.37.2"
 sqlalchemy = "^2.0.30"
-mysql = "^0.0.3"
 pymysql = "^1.1.0"
 
 
