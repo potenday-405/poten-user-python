@@ -96,3 +96,31 @@ async def modify_me(
         message="정보수정이 완료되었습니다.",
         data=str(user_id)
     )
+
+
+@router.post("/score")
+async def get_sum_score(
+    body:CalcUserScore,
+    version: str = Header("1.0"), 
+    user_id: Union[str, None] = Header(default=None), 
+    db:Session = Depends(get_test_db)
+):
+    user_service = UserService(db)
+
+    # 현재 회원의 score 조회
+    # 더미
+    user_id = "01d19529-d545-4d1d-a1d1-4ea001589b6e"
+
+    prev_score = await user_service.get_score(user_id)
+    new_score = await user_service.calculate_user_score(prev_score, body)
+    # await user_service.modify_user_score(user_id, new_score)
+
+    return UserCommonResponse(
+        message="회원의 점수가 변경되었습니다.",
+        data={
+            "prev_score" : prev_score,
+            "new_score" : new_score
+        }
+    )
+    
+    

@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field
 from typing import Optional
 from datetime import datetime
-
+from enum import Enum
 from typing import Generic, TypeVar
 DataT = TypeVar("DataT")
 
@@ -37,3 +37,14 @@ class UserProfile(BaseModel):
     phone: str 
     created_at : datetime
     updated_at : datetime
+
+
+class MethodClass(Enum):
+    DELETE = "DELETE"
+    POST = "POST"
+
+# Score점수 합산
+class CalcUserScore(BaseModel):
+    method: str
+    is_attendeed : int
+    

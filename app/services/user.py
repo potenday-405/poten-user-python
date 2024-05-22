@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from app.database import models
-from app.models.user import UserSignup, UserProfile, UserPassword
+from app.models.user import UserSignup, UserProfile, UserPassword, CalcUserScore
 from sqlalchemy import insert, update
 from jose import JWTError, jwt
 from typing import Optional
@@ -106,3 +106,43 @@ class UserService():
     async def get_curr_id(self):
         user = self.db.query(models.User).order_by(models.User.created_at.desc()).first()
         return user.user_id
+
+    async def get_score(self, user_id:str):
+        score_info = self.db.query(models.Score).filter(models.Score.user_id == user_id).first()
+        return score_info.score
+
+
+    async def calculate_user_score(self, prev_score:int, body:CalcUserScore):
+
+        attended = { "1" : 40,"2" : 15,"3" : 9, "4" : 6, "5" : 3 }
+        non_attended = { "1" : 20,"2" : 5, "3" : 3, "4" : 2, "5" : 1 }
+        record = { "1" : 40,"2" : 15,"3" : 9, "4" : 6, "5" : 3 }
+
+        # 각 등급별 score 부여처리
+        if prev_score <= 300:
+            grade = "1"
+        elif 300 < grade <= 450:
+            grade = "2"
+        elif 450 < grade <= 585:
+            grade = "3"
+        elif 585 < grade <= 772:
+            grade = "4"
+        else:
+            grade = "5"
+
+
+        method, is_attendeed = body.method, body.is_attendeed
+        method_score = record.get(f"{grade}") if method == "POST" else -int(record.get(f"{grade}"))
+        attended_score = attended.get(f"{grade}") if is_attendeed == 1 else int(non_attended.get(f"{grade}"))
+
+        return method_score + attended_score + prev_score
+
+    async def modify_user_score(self, user_id:str, new_score:int):
+        self.db.execute(
+            update(models.Score)
+            .where(models.Score.user_id == user_id)
+            .values(score=new_score)
+        )
+
+        self.db.commit()
+

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, func, DateTime
+from sqlalchemy import Column, Integer, String, func, DateTime, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 from datetime import datetime
 from app.database.settings import Base
@@ -17,6 +17,21 @@ class User(Base):
     user_name = Column(String, nullable=False)
     phone = Column(String, nullable=False)
     user_status = Column(String, nullable=False)
+    created_at = Column(DateTime, nullable=False, default=func.utc_timestamp())
+    updated_at = Column(
+        DateTime,
+        nullable=False,
+        default=func.utc_timestamp(),
+        onupdate=func.utc_timestamp(),
+    )
+
+class Score(Base):
+    __tablename__ = "user_score"
+
+    score_id = Column(String, nullable=False, primary_key=True, default=generate_uuid)
+    user_id = Column(String, ForeignKey('users.user_id'))
+    invitation_id = Column(Integer, nullable=False)
+    score = Column(Integer, nullable=False)
     created_at = Column(DateTime, nullable=False, default=func.utc_timestamp())
     updated_at = Column(
         DateTime,
