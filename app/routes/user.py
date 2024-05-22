@@ -63,6 +63,9 @@ async def get_me(
     """내 정보 조회"""
 
     user_service = UserService(db)
+    # 더미
+    user_id = "01d19529-d545-4d1d-a1d1-4ea001589b6e"
+
     return await user_service.get_user_profile(user_id)
     
 
@@ -74,37 +77,22 @@ async def modify_me(
     db:Session = Depends(get_test_db)
 ) :
     """
-        내 정보 수정
-
-    
+        내 정보 수정 - put으로 변경예정
     """
     user_service = UserService(db)
-    return await user_service.get_users()
-    # 비밀번호 일치여부 체크
-    # return await user_service.verify_password(user_id, body.org_password)
+    # 더미
+    user_id = "01d19529-d545-4d1d-a1d1-4ea001589b6e"
 
-    # return await user_service.modify_user_profile(user_id, password)
+    # 현재 비밀번호가 유효한지 체크
+    is_valid_password = await user_service.verify_password(user_id, body.org_password)
 
-# @router.get("/test")
-# async def test():
-#     """get 테스트용"""
+    if not is_valid_password:
+        raise HTTPException(status_code=400, detail="Original Password is not valid")
 
-#     return { "message" : "get test success!" }
+    # 유효할 경우, user_id로 password 업데이트 
+    await user_service.modify_user_profile(user_id, body.new_password)
 
-# @router.post("/test")
-# async def test():
-#     """post 테스트용"""
-
-#     return { "message" : "post test success!" }
-
-# @router.put("/test")
-# async def test():
-#     """put 테스트용"""
-
-#     return { "message" : "put test success!" }
-
-# @router.delete("/test")
-# async def test():
-#     """put 테스트용"""
-
-#     return { "message" : "delete test success!" }
+    return UserCommonResponse(
+        message="정보수정이 완료되었습니다.",
+        data=str(user_id)
+    )

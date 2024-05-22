@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 from app.database import models
-from app.models.user import UserSignup, UserProfile
-from sqlalchemy import insert
+from app.models.user import UserSignup, UserProfile, UserPassword
+from sqlalchemy import insert, update
 from jose import JWTError, jwt
 from typing import Optional
 from datetime import datetime, timedelta
@@ -79,8 +79,8 @@ class UserService():
     
     async def verify_password(self, user_id:str, org_password:str):
         User = models.User
-        print(user_id)
-        print(org_password)
+        print(user_id, "user_id")
+        print(org_password, "org_password")
         user = self.db.query(User).filter(
             User.user_id == user_id,
             User.user_password == org_password
@@ -88,16 +88,20 @@ class UserService():
 
         return user
 
-    async def modify_user_profile(self, user_id:str, password:str):
+    async def modify_user_profile(
+        self, 
+        user_id:str, 
+        new_password:str
+    ):
         User = models.User
 
-        user_id = self.db.execute(
-            select(User)
+        self.db.execute(
+            update(User)
             .where(User.user_id == user_id)
-            .values(User.user_password == password)
-        ).first()
+            .values(user_password=new_password)
+        )
 
-        return user_id
+        self.db.commit()
 
     async def get_curr_id(self):
         user = self.db.query(models.User).order_by(models.User.created_at.desc()).first()
