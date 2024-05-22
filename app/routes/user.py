@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated, Union
 from fastapi import APIRouter, Request,Header, HTTPException, Depends, status
 from sqlalchemy.orm import Session
 from app.database.settings import SessionLocal, engine, get_test_db
@@ -22,9 +22,11 @@ async def signup(user:UserSignup, db:Session = Depends(get_test_db), version: st
     # 없으면 회원가입
     await user_service.create_user(user)
 
+    user_id = await user_service.get_curr_id()
+
     return UserCommonResponse(
         message="회원가입이 완료되었습니다.",
-        data=None
+        data=str(user_id)
     )
 
 @router.post("/login")
@@ -55,20 +57,20 @@ async def create_token(request:UserLogin, db:Session = Depends(get_test_db), ver
 @router.get("/profile")
 async def get_me(
     version: str = Header("1.0"), 
-    user_id: Annotated[str | None, Header()] = None, 
+    user_id: str | None = Header(default=None), 
     db:Session = Depends(get_test_db)
-):
+) :
     """내 정보 조회"""
-    return "hhh"
-    # user_service = UserService(db)
-    # return await user_service.get_user_profile(user_id)
+    
+    user_service = UserService(db)
+    return await user_service.get_user_profile(user_id)
     
 
 @router.post("/profile")
 async def modify_me(
     body : UserPassword,
     version: str = Header("1.0"), 
-    user_id: Annotated[str | None, Header()] = None, 
+    user_id: Union[str, None] = Header(default=None), 
     db:Session = Depends(get_test_db)
 ) :
     """
@@ -76,10 +78,10 @@ async def modify_me(
 
     
     """
-
     user_service = UserService(db)
+    return await user_service.get_users()
     # 비밀번호 일치여부 체크
-    return await user_service.verify_password(user_id, body.org_password)
+    # return await user_service.verify_password(user_id, body.org_password)
 
     # return await user_service.modify_user_profile(user_id, password)
 

@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from app.database import models
-from app.models.user import UserSignup
+from app.models.user import UserSignup, UserProfile
 from sqlalchemy import insert
 from jose import JWTError, jwt
 from typing import Optional
@@ -40,6 +40,7 @@ class UserService():
             User.email == email,
             User.user_password == password
         ).first()
+
         return user
 
     async def get_users(self):
@@ -55,7 +56,50 @@ class UserService():
         if expires_delta:
             expire = datetime.utcnow() + expires_delta
         else:
-            expire = datetime.utcnow() + timedelta(minutes=15)
+            expire = datetime.utcnow() + timedelta(minutes=30)
         to_encode.update({"exp": expire})
         encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
         return encoded_jwt
+
+    
+    async def get_user_profile(self, user_id:str):
+
+        user =  self.db.query(models.User).filter(models.User.user_id == user_id).first()
+
+        # return UserProfile(
+        #     user_id = user_id,
+        #     email = user.email,
+        #     user_password = user.user_password,
+        #     user_status = user.user_status,
+        #     user_name = user.user_name,
+        #     phone = user.phone,
+        #     created_at = user.created_at,
+        #     updated_at = user.updated_at,
+        # )
+    
+    async def verify_password(self, user_id:str, org_password:str):
+        User = models.User
+        print(user_id)
+        print(org_password)
+        user = self.db.query(User).filter(
+            User.user_id == user_id,
+            User.user_password == org_password
+        ).first()
+
+        return user
+
+    async def modify_user_profile(self, user_id:str, password:str):
+        User = models.User
+
+        user_id = self.db.execute(
+            select(User)
+            .where(User.user_id == user_id)
+            .values(User.user_password == password)
+        ).first()
+
+        return user_id
+
+    async def get_curr_id(self):
+        user = self.db.query(models.User).order_by(models.User.created_at.desc()).first()
+        return user.user_id
+        
