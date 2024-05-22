@@ -101,7 +101,7 @@ async def get_sum_score(
     request : Request,
     body:CalcUserScore,
     db:Session = Depends(get_test_db)
-):
+) -> UserCommonResponse:
 
     headers = request.headers
     user_id = headers.get("user_id")

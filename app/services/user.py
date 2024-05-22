@@ -131,15 +131,20 @@ class UserService():
 
         method, is_attendeed = body.method, body.is_attendeed
 
-        if method == "POST":
-            method_score = record.get(f"{grade}")
-        elif method == "DELETE":
-            method_score = -int(record.get(f"{grade}"))
-        else:
-            method_score = 0
         attended_score = attended.get(f"{grade}") if is_attendeed == 1 else int(non_attended.get(f"{grade}"))
 
-        return method_score + attended_score + prev_score
+        if method == "POST":
+            method_score = record.get(f"{grade}")
+            return method_score + attended_score + prev_score
+        elif method == "DELETE":
+            method_score = -int(record.get(f"{grade}"))
+            return method_score - attended_score + prev_score
+        else:
+            method_score = 0
+            # 참석으로 변경 시 ( 참석 - 불참점수 ), 불참으로 변경 시 (불참점수 - 참석점수)
+            attended_score_diff = attended.get(f"{grade}") - non_attended.get(f"{grade}")
+            proceed_attended = attended_score_diff if is_attendeed == 1 else -attended_score_diff
+            return method_score + proceed_attended + prev_score
 
     async def modify_user_score(self, user_id:str, new_score:int):
         self.db.execute(
