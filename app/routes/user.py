@@ -56,32 +56,30 @@ async def create_token(request:UserLogin, db:Session = Depends(get_test_db), ver
 
 @router.get("/profile")
 async def get_me(
-    version: str = Header("1.0"), 
-    user_id: str | None = Header(default=None), 
+    request:Request,
     db:Session = Depends(get_test_db)
 ) :
     """내 정보 조회"""
+    headers = request.headers
+    user_id = headers.get("user_id")
 
     user_service = UserService(db)
-    # 더미
-    # user_id = "01d19529-d545-4d1d-a1d1-4ea001589b6e"
-
     return await user_service.get_user_profile(user_id)
     
 
 @router.post("/profile")
 async def modify_me(
     body : UserPassword,
-    version: str = Header("1.0"), 
-    user_id: Union[str, None] = Header(default=None), 
+    request:Request,
     db:Session = Depends(get_test_db)
 ) :
     """
         내 정보 수정 - put으로 변경예정
     """
+    headers = request.headers
+    user_id = headers.get("user_id")
+
     user_service = UserService(db)
-    # 더미
-    # user_id = "01d19529-d545-4d1d-a1d1-4ea001589b6e"
 
     # 현재 비밀번호가 유효한지 체크
     is_valid_password = await user_service.verify_password(user_id, body.org_password)
@@ -100,17 +98,17 @@ async def modify_me(
 
 @router.post("/score")
 async def get_sum_score(
+    request : Request,
     body:CalcUserScore,
-    version: str = Header("1.0"), 
-    user_id: Union[str, None] = Header(default=None), 
     db:Session = Depends(get_test_db)
 ):
+
+    headers = request.headers
+    user_id = headers.get("user_id")
+
     user_service = UserService(db)
 
     # 현재 회원의 score 조회
-    # 더미
-    # user_id = "01d19529-d545-4d1d-a1d1-4ea001589b6e"
-
     prev_score = await user_service.get_score(user_id)
     new_score = await user_service.calculate_user_score(prev_score, body)
     await user_service.modify_user_score(user_id, new_score)
