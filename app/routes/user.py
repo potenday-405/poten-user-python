@@ -40,7 +40,7 @@ async def create_token(request:UserLogin, db:Session = Depends(get_test_db), ver
     
     if not is_validate:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
+            status_code=401,
             detail="Incorrect email or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
@@ -61,7 +61,7 @@ async def get_me(
     db:Session = Depends(get_test_db)
 ) :
     """내 정보 조회"""
-    
+
     user_service = UserService(db)
     return await user_service.get_user_profile(user_id)
     

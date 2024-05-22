@@ -66,16 +66,16 @@ class UserService():
 
         user =  self.db.query(models.User).filter(models.User.user_id == user_id).first()
 
-        # return UserProfile(
-        #     user_id = user_id,
-        #     email = user.email,
-        #     user_password = user.user_password,
-        #     user_status = user.user_status,
-        #     user_name = user.user_name,
-        #     phone = user.phone,
-        #     created_at = user.created_at,
-        #     updated_at = user.updated_at,
-        # )
+        return UserProfile(
+            user_id = user_id,
+            email = user.email,
+            user_password = user.user_password,
+            user_status = user.user_status,
+            user_name = user.user_name,
+            phone = user.phone,
+            created_at = user.created_at,
+            updated_at = user.updated_at,
+        )
     
     async def verify_password(self, user_id:str, org_password:str):
         User = models.User
@@ -102,4 +102,3 @@ class UserService():
     async def get_curr_id(self):
         user = self.db.query(models.User).order_by(models.User.created_at.desc()).first()
         return user.user_id
-        
