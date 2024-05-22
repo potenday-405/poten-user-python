@@ -67,7 +67,7 @@ async def get_me(
     return await user_service.get_user_profile(user_id)
     
 
-@router.post("/profile")
+@router.put("/profile")
 async def modify_me(
     body : UserPassword,
     request:Request,
