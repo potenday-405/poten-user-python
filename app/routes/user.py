@@ -4,12 +4,12 @@ from sqlalchemy.orm import Session
 from app.database.settings import SessionLocal, engine, get_test_db
 from app.services.user import UserService
 from app.core.db import Engineconn
-from app.models.user import UserSignup, UserSignupResponse, UserToken, UserLogin
+from app.models.user import *
 
 router = APIRouter()
 
 @router.post("/signup")
-async def signup(user:UserSignup, db:Session = Depends(get_test_db), version: str = Header("1.0")) -> UserSignupResponse:
+async def signup(user:UserSignup, db:Session = Depends(get_test_db), version: str = Header("1.0")) -> UserCommonResponse:
     """회원가입 api"""
     user_service = UserService(db)
 
@@ -22,7 +22,10 @@ async def signup(user:UserSignup, db:Session = Depends(get_test_db), version: st
     # 없으면 회원가입
     await user_service.create_user(user)
 
-    return UserSignupResponse(message="회원가입이 완료되었습니다.")
+    return UserCommonResponse(
+        message="회원가입이 완료되었습니다.",
+        data=None
+    )
 
 @router.post("/login")
 async def create_token(request:UserLogin, db:Session = Depends(get_test_db), version: str = Header("1.0")) -> UserToken:
@@ -32,6 +35,7 @@ async def create_token(request:UserLogin, db:Session = Depends(get_test_db), ver
 
     # 유효한 회원인지 체크
     is_validate = await user_service.check_validate_user(email=request.email, password=request.user_password)
+    
     if not is_validate:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -40,7 +44,7 @@ async def create_token(request:UserLogin, db:Session = Depends(get_test_db), ver
         )
 
     # accesstoken 발행
-    access_token = user_service.create_access_token(data={"sub": request.email})
+    access_token = user_service.create_access_token(data={"sub": is_validate.user_id})
 
     return UserToken(
         access_token=access_token,
@@ -48,31 +52,57 @@ async def create_token(request:UserLogin, db:Session = Depends(get_test_db), ver
     )
     
 
-@router.get("/me")
-async def get_me(version: str = Header("1.0"), access_token: Annotated[str | None, Header()] = None, db:Session = Depends(get_test_db)):
-    return ""
+@router.get("/profile")
+async def get_me(
+    version: str = Header("1.0"), 
+    user_id: Annotated[str | None, Header()] = None, 
+    db:Session = Depends(get_test_db)
+):
+    """내 정보 조회"""
+    return "hhh"
+    # user_service = UserService(db)
+    # return await user_service.get_user_profile(user_id)
+    
 
+@router.post("/profile")
+async def modify_me(
+    body : UserPassword,
+    version: str = Header("1.0"), 
+    user_id: Annotated[str | None, Header()] = None, 
+    db:Session = Depends(get_test_db)
+) :
+    """
+        내 정보 수정
 
-@router.get("/test")
-async def test():
-    """get 테스트용"""
+    
+    """
 
-    return { "message" : "get test success!" }
+    user_service = UserService(db)
+    # 비밀번호 일치여부 체크
+    return await user_service.verify_password(user_id, body.org_password)
 
-@router.post("/test")
-async def test():
-    """post 테스트용"""
+    # return await user_service.modify_user_profile(user_id, password)
 
-    return { "message" : "post test success!" }
+# @router.get("/test")
+# async def test():
+#     """get 테스트용"""
 
-@router.put("/test")
-async def test():
-    """put 테스트용"""
+#     return { "message" : "get test success!" }
 
-    return { "message" : "put test success!" }
+# @router.post("/test")
+# async def test():
+#     """post 테스트용"""
 
-@router.delete("/test")
-async def test():
-    """put 테스트용"""
+#     return { "message" : "post test success!" }
 
-    return { "message" : "delete test success!" }
+# @router.put("/test")
+# async def test():
+#     """put 테스트용"""
+
+#     return { "message" : "put test success!" }
+
+# @router.delete("/test")
+# async def test():
+#     """put 테스트용"""
+
+#     return { "message" : "delete test success!" }
