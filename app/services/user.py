@@ -79,8 +79,6 @@ class UserService():
     
     async def verify_password(self, user_id:str, org_password:str):
         User = models.User
-        print(user_id, "user_id")
-        print(org_password, "org_password")
         user = self.db.query(User).filter(
             User.user_id == user_id,
             User.user_password == org_password
@@ -112,6 +110,7 @@ class UserService():
         return score_info.score
 
 
+
     async def calculate_user_score(self, prev_score:int, body:CalcUserScore):
 
         attended = { "1" : 40,"2" : 15,"3" : 9, "4" : 6, "5" : 3 }
@@ -130,9 +129,14 @@ class UserService():
         else:
             grade = "5"
 
-
         method, is_attendeed = body.method, body.is_attendeed
-        method_score = record.get(f"{grade}") if method == "POST" else -int(record.get(f"{grade}"))
+
+        if method == "POST":
+            method_score = record.get(f"{grade}")
+        elif method == "DELETE":
+            method_score = -int(record.get(f"{grade}"))
+        else:
+            method_score = 0
         attended_score = attended.get(f"{grade}") if is_attendeed == 1 else int(non_attended.get(f"{grade}"))
 
         return method_score + attended_score + prev_score
