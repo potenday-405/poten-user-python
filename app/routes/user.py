@@ -64,7 +64,7 @@ async def get_me(
 
     user_service = UserService(db)
     # 더미
-    user_id = "01d19529-d545-4d1d-a1d1-4ea001589b6e"
+    # user_id = "01d19529-d545-4d1d-a1d1-4ea001589b6e"
 
     return await user_service.get_user_profile(user_id)
     
@@ -81,7 +81,7 @@ async def modify_me(
     """
     user_service = UserService(db)
     # 더미
-    user_id = "01d19529-d545-4d1d-a1d1-4ea001589b6e"
+    # user_id = "01d19529-d545-4d1d-a1d1-4ea001589b6e"
 
     # 현재 비밀번호가 유효한지 체크
     is_valid_password = await user_service.verify_password(user_id, body.org_password)
@@ -109,11 +109,11 @@ async def get_sum_score(
 
     # 현재 회원의 score 조회
     # 더미
-    user_id = "01d19529-d545-4d1d-a1d1-4ea001589b6e"
+    # user_id = "01d19529-d545-4d1d-a1d1-4ea001589b6e"
 
     prev_score = await user_service.get_score(user_id)
     new_score = await user_service.calculate_user_score(prev_score, body)
-    # await user_service.modify_user_score(user_id, new_score)
+    await user_service.modify_user_score(user_id, new_score)
 
     return UserCommonResponse(
         message="회원의 점수가 변경되었습니다.",
