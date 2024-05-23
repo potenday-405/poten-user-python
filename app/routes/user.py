@@ -10,7 +10,16 @@ router = APIRouter()
 
 @router.post("/signup")
 async def signup(user:UserSignup, db:Session = Depends(get_test_db), version: str = Header("1.0")) -> UserCommonResponse:
-    """회원가입 api"""
+    """회원가입 api
+
+        user_name : 이름
+        
+        email : 이메일주소
+
+        user_password : 비밀번호
+        
+        phone : 전화번호
+    """
     user_service = UserService(db)
 
     # 같은 이메일 존재하는지 체크
@@ -31,7 +40,13 @@ async def signup(user:UserSignup, db:Session = Depends(get_test_db), version: st
 
 @router.post("/login")
 async def create_token(request:UserLogin, db:Session = Depends(get_test_db), version: str = Header("1.0")) -> UserToken:
-    """로그인 시 accessToken 발행"""
+    """
+        로그인 시 accessToken 발행
+
+        email : 이메일 주소
+        
+        user_password : 비밀번호
+    """
 
     user_service = UserService(db)
 
@@ -74,7 +89,12 @@ async def modify_me(
     db:Session = Depends(get_test_db)
 ) :
     """
-        내 정보 수정 - put으로 변경예정
+        내 정보 수정
+
+        org_password : 기존 비밀번호
+        
+        new_password : 나중 비밀번호
+
     """
     headers = request.headers
     user_id = headers.get("user_id")
@@ -102,6 +122,13 @@ async def get_sum_score(
     body:CalcUserScore,
     db:Session = Depends(get_test_db)
 ) -> UserCommonResponse:
+    """
+        축의금 등록/수정/삭제에 의해 변동된 점수를 조회.
+
+        method : 등록(POST) / 수정(PUT) / 삭제(DELETE)
+        
+        is_attended : 1(참석) / 0(불참)
+    """
 
     headers = request.headers
     user_id = headers.get("user_id")
