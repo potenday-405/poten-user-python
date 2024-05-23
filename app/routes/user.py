@@ -147,5 +147,14 @@ async def get_sum_score(
             "new_score" : new_score
         }
     )
-    
-    
+
+@router.post("/test")
+async def get_sum_score(
+    request : Request,
+    body:CalcUserScore
+) :
+
+    headers = request.headers
+    user_id = headers.get("user_id")
+
+    return user_id
