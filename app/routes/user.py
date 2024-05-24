@@ -138,7 +138,7 @@ async def get_sum_score(
     # 현재 회원의 score 조회
     prev_score = await user_service.get_score(user_id)
     new_score = await user_service.calculate_user_score(prev_score, body)
-    await user_service.modify_user_score(user_id, new_score, body.invitation_type)
+    await user_service.modify_user_score(user_id, prev_score, new_score, body.invitation_type)
 
     return UserCommonResponse(
         message="회원의 점수가 변경되었습니다.",

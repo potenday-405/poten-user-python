@@ -9,8 +9,6 @@ from datetime import datetime, timedelta
 from app.core.config import ACCESS_TOKEN_EXPIRE_MINUTES, SECRET_KEY, ALGORITHM
 from fastapi import HTTPException, status
 
-from sqlalchemy.dialects.mysql import insert as mysql_insert
-
 class UserService():
     def __init__(self, db:Session):
         self.db = db
@@ -156,21 +154,33 @@ class UserService():
             proceed_attended = attended_score_diff if is_attended == 1 else -attended_score_diff
             return method_score + proceed_attended + prev_score
 
-    async def modify_user_score(self, user_id:str, new_score:int, invitation_type:str):
-        # TODO update용 쿼리 실행함수 따로 분리할 것 🚨
+    async def modify_user_score(
+        self, 
+        user_id:str, 
+        prev_score : int, 
+        new_score:int, 
+        invitation_type:str
+    ):
+        # TODO 추후 ORM 이용해서 로직 수정할 것 
         try:
-            self.db.execute(
-                mysql_insert(models.Score)
-                .values(
-                    user_id=user_id, 
-                    score=new_score,
-                    invitation_id=1 if invitation_type == "Wedding" else 0
+            
+            if prev_score != 0:
+                self.db.execute(
+                    update(models.Score)
+                    .where(models.Score.user_id == user_id)
+                    .values(score=new_score)
                 )
-                .on_duplicate_key_update(
-                    score=new_score
-                )
-            )
+                
+            else :
 
+                self.db.execute(
+                    insert(models.Score)
+                    .values(
+                        user_id=user_id, 
+                        invitation_id=1 if invitation_type == "Wedding" else 0,
+                        score=new_score,    
+                    )
+                )
 
             self.db.commit()
         except OperationalError as e:
