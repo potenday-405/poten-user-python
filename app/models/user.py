@@ -47,4 +47,5 @@ class MethodClass(Enum):
 class CalcUserScore(BaseModel):
     method: str
     is_attended : int
+    invitation_type : str
     
