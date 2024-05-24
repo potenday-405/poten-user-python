@@ -1,11 +1,13 @@
 from sqlalchemy.orm import Session
+from sqlalchemy import insert, update
+from sqlalchemy.exc import OperationalError
 from app.database import models
 from app.models.user import UserSignup, UserProfile, UserPassword, CalcUserScore
-from sqlalchemy import insert, update
 from jose import JWTError, jwt
 from typing import Optional
 from datetime import datetime, timedelta
 from app.core.config import ACCESS_TOKEN_EXPIRE_MINUTES, SECRET_KEY, ALGORITHM
+from fastapi import HTTPException, status
 
 class UserService():
     def __init__(self, db:Session):
@@ -93,13 +95,18 @@ class UserService():
     ):
         User = models.User
 
-        self.db.execute(
-            update(User)
-            .where(User.user_id == user_id)
-            .values(user_password=new_password)
-        )
+        # TODO update용 쿼리 실행함수 따로 분리할 것 🚨
+        try:
+            self.db.execute(
+                update(User)
+                .where(User.user_id == user_id)
+                .values(user_password=new_password)
+            )
 
-        self.db.commit()
+            self.db.commit()
+        except OperationalError as e:
+            error_msg = "Failed to modify user profile."
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=error_msg)
 
     async def get_curr_id(self):
         user = self.db.query(models.User).order_by(models.User.created_at.desc()).first()
@@ -108,8 +115,6 @@ class UserService():
     async def get_score(self, user_id:str):
         score_info = self.db.query(models.Score).filter(models.Score.user_id == user_id).first()
         return score_info.score
-
-
 
     async def calculate_user_score(self, prev_score:int, body:CalcUserScore):
 
@@ -147,11 +152,16 @@ class UserService():
             return method_score + proceed_attended + prev_score
 
     async def modify_user_score(self, user_id:str, new_score:int):
-        self.db.execute(
-            update(models.Score)
-            .where(models.Score.user_id == user_id)
-            .values(score=new_score)
-        )
+        # TODO update용 쿼리 실행함수 따로 분리할 것 🚨
+        try:
+            self.db.execute(
+                update(models.Score)
+                .where(models.Score.user_id == user_id)
+                .values(score=new_score)
+            )
 
-        self.db.commit()
+            self.db.commit()
+        except OperationalError as e:
+            error_msg = "Failed to modify user score."
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=error_msg)
 
