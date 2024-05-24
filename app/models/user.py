@@ -46,5 +46,5 @@ class MethodClass(Enum):
 # Score점수 합산
 class CalcUserScore(BaseModel):
     method: str
-    is_attendeed : int
+    is_attended : int
     
