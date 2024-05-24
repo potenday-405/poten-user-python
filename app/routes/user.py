@@ -148,6 +148,21 @@ async def get_sum_score(
         }
     )
 
+@router.get("/score")
+async def get_user_score(
+    request : Request,
+    db:Session = Depends(get_test_db)
+):
+    """회원 점수 조회"""
+
+    headers = request.headers
+    user_id = headers.get("user_id")
+
+    user_service = UserService(db)
+
+    # 현재 회원의 score 조회
+    return await user_service.get_score(user_id)
+
 @router.post("/test")
 async def get_sum_score(
     request : Request,
