@@ -114,7 +114,10 @@ class UserService():
 
     async def get_score(self, user_id:str):
         score_info = self.db.query(models.Score).filter(models.Score.user_id == user_id).first()
-        return score_info.score
+        if score_info:
+            return score_info.score
+        else:
+            return 0
 
     async def calculate_user_score(self, prev_score:int, body:CalcUserScore):
 
