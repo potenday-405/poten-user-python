@@ -9,6 +9,8 @@ from datetime import datetime, timedelta
 from app.core.config import ACCESS_TOKEN_EXPIRE_MINUTES, SECRET_KEY, ALGORITHM
 from fastapi import HTTPException, status
 
+from sqlalchemy.dialects.mysql import insert as mysql_insert
+
 class UserService():
     def __init__(self, db:Session):
         self.db = db
@@ -158,17 +160,17 @@ class UserService():
         # TODO update용 쿼리 실행함수 따로 분리할 것 🚨
         try:
             self.db.execute(
-                insert(models.Score)
+                mysql_insert(models.Score)
                 .values(
                     user_id=user_id, 
                     score=new_score,
-                    invitation_id= 1 if invitation_type == "Wedding" else 0
+                    invitation_id=1 if invitation_type == "Wedding" else 0
                 )
-                .on_conflict_do_update(
-                    constraint='score_id',  
-                    set_=dict(score=new_score)
+                .on_duplicate_key_update(
+                    score=new_score
                 )
             )
+
 
             self.db.commit()
         except OperationalError as e:
