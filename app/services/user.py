@@ -172,7 +172,6 @@ class UserService():
                 )
                 
             else :
-
                 self.db.execute(
                     insert(models.Score)
                     .values(
