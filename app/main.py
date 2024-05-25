@@ -5,10 +5,10 @@ from app.routes.user import router
 app = FastAPI(title="회원관련 API입니다.")
 
 origins = [
-    "https://poten-fe.vercel.app/",
-    "http://poten-fe.vercel.app/",
     "http://localhost",
-    "http://localhost:8080",
+    "http://localhost:3000",
+    "https://poten-fe.vercel.app",
+    "https://tikitakaapi.site",
 ]
 
 app.add_middleware(
