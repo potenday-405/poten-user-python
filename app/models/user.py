@@ -21,6 +21,7 @@ class UserLogin(BaseModel):
 
 class UserToken(BaseModel):
     access_token: str
+    refresh_token: str
     token_type:str
 
 #TODO 이게 클래스로 굳이 정해야 하는지..? 다시 고민해보고 뺄지 말지 체크

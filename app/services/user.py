@@ -51,11 +51,15 @@ class UserService():
     #TODO auth쪽은 따로 분리할 것
     # JWT 토큰 생성 함수 
     def create_access_token(self, data: dict):
-
-        expires_delta = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-
         to_encode = data.copy()
-        expire = datetime.utcnow() + timedelta(days=7)
+        expire = datetime.utcnow() + timedelta(minutes=30)
+        to_encode.update({"exp": expire})
+        encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+        return encoded_jwt
+    
+    def create_refresh_token(self, data:dict ):
+        to_encode = data.copy()
+        expire = datetime.utcnow() + timedelta(days=90)
         to_encode.update({"exp": expire})
         encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
         return encoded_jwt
