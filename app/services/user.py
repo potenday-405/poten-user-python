@@ -6,7 +6,7 @@ from app.models.user import UserSignup, UserProfile, UserPassword, CalcUserScore
 from jose import JWTError, jwt
 from typing import Optional
 from datetime import datetime, timedelta
-from app.core.config import ACCESS_TOKEN_EXPIRE_MINUTES, SECRET_KEY, ALGORITHM
+from app.core.config import ACCESS_TOKEN_EXPIRE_MINUTES, REFRESH_SECRET_KEY, SECRET_KEY, ALGORITHM
 from fastapi import HTTPException, status
 
 class UserService():
@@ -61,7 +61,7 @@ class UserService():
         to_encode = data.copy()
         expire = datetime.utcnow() + timedelta(days=90)
         to_encode.update({"exp": expire})
-        encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+        encoded_jwt = jwt.encode(to_encode, REFRESH_SECRET_KEY, algorithm=ALGORITHM)
         return encoded_jwt
 
     

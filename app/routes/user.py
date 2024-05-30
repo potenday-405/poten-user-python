@@ -62,8 +62,9 @@ async def create_token(request:UserLogin, db:Session = Depends(get_test_db), ver
 
     # accesstoken 발행
     access_token = user_service.create_access_token(data={"sub": is_validate.user_id})
+    
     # refreshtoken 발행
-    refresh_token = user_service.create_access_token(data={"sub": is_validate.user_id})
+    refresh_token = user_service.create_refresh_token(data={"sub": is_validate.user_id})
 
     return UserToken(
         access_token=access_token,
