@@ -9,7 +9,10 @@ from app.models.user import *
 router = APIRouter()
 
 @router.post("/signup")
-async def signup(user:UserSignup, db:Session = Depends(get_test_db), version: str = Header("1.0")) -> UserCommonResponse:
+async def signup(
+    user:UserSignup, 
+    db:Session = Depends(get_test_db)
+) -> UserCommonResponse:
     """회원가입 api
 
         user_name : 이름
@@ -39,7 +42,10 @@ async def signup(user:UserSignup, db:Session = Depends(get_test_db), version: st
     )
 
 @router.post("/login")
-async def create_token(request:UserLogin, db:Session = Depends(get_test_db), version: str = Header("1.0")) -> UserToken:
+async def create_token(
+    request:UserLogin, 
+    db:Session = Depends(get_test_db), 
+) -> UserToken:
     """
         로그인 시 accessToken 발행
 
@@ -166,6 +172,32 @@ async def get_user_score(
 
     # 현재 회원의 score 조회
     return await user_service.get_score(user_id)
+
+@router.post("/token")
+async def get_new_token(
+    request : Request,
+    db:Session = Depends(get_test_db),
+) :
+    """새로운 토큰 발행하는 API"""
+
+    user_service = UserService(db)
+
+    # 유효한 회원인지 user_id값으로 확인하기
+    user_id = request.headers.get("user_id")
+    is_valid_user = await user_service.get_user_profile(user_id)
+
+    if not is_valid_user:
+        raise HTTPException(status_code=400, detail="Invalid User")
+    
+    # 새로운 accessToken, refreshToken 발행 후 return
+    access_token = user_service.create_access_token(data={"sub": user_id})
+    refresh_token = user_service.create_refresh_token(data={"sub": user_id})
+
+    return UserToken(
+        access_token=access_token,
+        refresh_token=refresh_token,
+        token_type="bearer"
+    )
 
 @router.post("/test")
 async def get_sum_score(
