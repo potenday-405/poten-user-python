@@ -9,9 +9,17 @@ from datetime import datetime, timedelta
 from app.core.config import ACCESS_TOKEN_EXPIRE_MINUTES, REFRESH_SECRET_KEY, SECRET_KEY, ALGORITHM
 from fastapi import HTTPException, status
 
+import bcrypt
+
 class UserService():
     def __init__(self, db:Session):
         self.db = db
+
+    @staticmethod
+    def get_encrypted_password(password:str):
+        """비밀번호 암호화 해서 return하는 메소드."""
+        hashed = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
+        return hashed.decode("utf-8")
 
     async def check_existed_user(self, email:str):
         """회원가입 시 email을 통해 이미 가잆된 사용자가 있는지 반환
@@ -24,12 +32,12 @@ class UserService():
 
     async def create_user(self, user:UserSignup):
         """회원가입"""
-        self.db.execute(
-            insert(models.User).values(
+
+        self.db.execute(insert(models.User).values({
             **user.dict(),
-            # password=get_hashed_password(user.password),
-            user_status='act'
-        ))
+            "user_password" :self.get_encrypted_password(user.user_password),
+            "user_status" : "act"
+        }))
 
         self.db.commit()
         
@@ -64,7 +72,6 @@ class UserService():
         encoded_jwt = jwt.encode(to_encode, REFRESH_SECRET_KEY, algorithm=ALGORITHM)
         return encoded_jwt
 
-    
     async def get_user_profile(self, user_id:str):
 
         user =  self.db.query(models.User).filter(models.User.user_id == user_id).first()
