@@ -56,21 +56,31 @@ async def create_token(
 
     user_service = UserService(db)
 
-    # 유효한 회원인지 체크
-    is_validate = await user_service.check_validate_user(email=request.email, password=request.user_password)
+    # email주소 유효성 검사
+    validate_user = await user_service.check_validate_user(email=request.email)
     
-    if not is_validate:
+    if not validate_user:
         raise HTTPException(
             status_code=401,
-            detail="Incorrect email or password",
+            detail="Incorrect email",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    # 비밀번호 유효성 검사
+    validate_password = user_service.check_validate_password(request.user_password, validate_user.user_password)
+
+    if not validate_password:
+        raise HTTPException(
+            status_code=401,
+            detail="Incorrect password",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
     # accesstoken 발행
-    access_token = user_service.create_access_token(data={"sub": is_validate.user_id})
+    access_token = user_service.create_access_token(data={"sub": validate_user.user_id})
     
     # refreshtoken 발행
-    refresh_token = user_service.create_refresh_token(data={"sub": is_validate.user_id})
+    refresh_token = user_service.create_refresh_token(data={"sub": validate_user.user_id})
 
     return UserToken(
         access_token=access_token,

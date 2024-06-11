@@ -21,6 +21,11 @@ class UserService():
         hashed = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
         return hashed.decode("utf-8")
 
+    @staticmethod
+    def verify_password(password:str, encrypted_password:str):
+        """비밀번호 유효성 검사"""
+        return bcrypt.checkpw(password.encode('utf-8'), encrypted_password.encode('utf-8'))
+
     async def check_existed_user(self, email:str):
         """회원가입 시 email을 통해 이미 가잆된 사용자가 있는지 반환
 
@@ -43,15 +48,15 @@ class UserService():
         
         return user
 
-    async def check_validate_user(self, email, password):
+    async def check_validate_user(self, email):
         """이메일로 사용자 조회"""
         User = models.User
-        user = self.db.query(User).filter(
-            User.email == email,
-            User.user_password == password
-        ).first()
-
+        user = self.db.query(User).filter(User.email == email).first()
         return user
+    
+    def check_validate_password(self, password:str, encrypted_password:str):
+        """이메일로 사용자 조회"""
+        return bcrypt.checkpw(password.encode('utf-8'), encrypted_password.encode('utf-8'))
 
     async def get_users(self):
         return self.db.query(models.User).all()
