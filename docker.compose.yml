@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  user-container:
+    image: usercl
+    networks:
+      - garden-of-records
+    environment:
+      - DATABASE_URL=mysql://user:password@mysql-server/db_name  
+    depends_on:
+      - mysql-server 
+
+  mysql-server:
+    image: mysql:latest
+    restart: always
+    environment:
+      MYSQL_DATABASE: db_name
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+      MYSQL_ROOT_PASSWORD: root_password
+    networks:
+      - garden-of-records
+    volumes:
+      - mysql-data:/var/lib/mysql 
+
+networks:
+  garden-of-records:
+    driver: bridge
+
+volumes:
+  mysql-data:
+    driver: local
